@@ -158,6 +158,7 @@ namespace NEO6M {
         }
         parseGPSData(collectedData)
         serial.redirectToUSB()
+        collectedData = ""
     }
 
     /**
