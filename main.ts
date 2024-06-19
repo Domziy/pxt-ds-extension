@@ -116,6 +116,11 @@ namespace BMP280 {
     }
 }
 namespace NEO6M {
+    /**
+     * Parse RMV
+     */
+    //% blockId="NEO6M_RMC_PARSE" block="parse RMC"
+    //% weight=80 blockGap=8
     export function parseRMC(sentence: string) {
         // serial.writeLine("Parts:" + sentence);
         parts = sentence.split(",")
