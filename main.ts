@@ -71,7 +71,7 @@ namespace BMP280 {
     /**
      * get pressure
      */
-    //% blockId="BMP280_GET_PRESSURE" block="get pressure"
+    //% blockId="BMP280_GET_PRESSURE" block="get pressures"
     //% weight=80 blockGap=8
     export function pressure(): number {
         get();
@@ -115,7 +115,7 @@ namespace BMP280 {
         BMP280_I2C_ADDR = addr
     }
 }
-namespace NEO_6M {
+namespace NEO6M {
     export function parseRMC(sentence: string) {
         // serial.writeLine("Parts:" + sentence);
         parts = sentence.split(",")
