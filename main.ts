@@ -139,7 +139,7 @@ namespace NEO6M {
         parts = sentence.split(",")
         time = parts[1]
         lat = "" + parts[2].substr(0, 2) + " " + parts[2].substr(2, parts[2].length) + parts[3]
-        lon = "" + parts[4].substr(0, 3) + " " + parts[4].substr(3, parts[2].length) + parts[5]
+        lon = "" + parts[4].substr(0, 3) + " " + parts[4].substr(3, parts[4].length) + parts[5]
         satellites = parseInt(parts[7])
         alltitude = parseInt(parts[9])
     }
@@ -164,13 +164,58 @@ namespace NEO6M {
     /**
      * Get coordinates
      */
-    //% blockId="NEO6M_RMC_PARSE" block="Get coordinates"
+    //% blockId="NEO6M_GET_COORDINATES" block="Get coordinates"
     //% weight=80 blockGap=8
     export function get_coordinates(): string
     {
         collectGPSData()
         return lat + " " + lon
     }
+
+    /**
+     * Get alltitude
+     */
+    //% blockId="NEO6M_GET_ALLTITUDE" block="Get alltitude"
+    //% weight=80 blockGap=8
+    export function get_alltitude(): number {
+        collectGPSData()
+        return alltitude
+    }
+
+    /**
+     * Get date
+     */
+    //% blockId="NEO6M_GET_DATE" block="Get date"
+    //% weight=80 blockGap=8
+    export function get_date(): string {
+        collectGPSData()
+        let datum: string
+        datum = date.substr(0,2) + "." + date.substr(2,2) + "." + date.substr(4,2)
+        return datum
+    }
+
+    /**
+     * Get time
+     */
+    //% blockId="NEO6M_GET_TIME" block="Get UTC time"
+    //% weight=80 blockGap=8
+    export function get_utc_time(): string {
+        collectGPSData()
+        let cas: string
+        cas = time.substr(0, 2) + ":" + date.substr(2, 2) + ":" + date.substr(4, 2)
+        return cas
+    }
+
+    /**
+     * Get satellites
+     */
+    //% blockId="NEO6M_GET_SATELLITES" block="Get satellites"
+    //% weight=80 blockGap=8
+    export function get_satellites(): number {
+        collectGPSData()
+        return satellites
+    }
+    
     let alltitude: number
     let parts3: string[] = []
     let collectedData = ""
