@@ -116,7 +116,6 @@ namespace BMP280 {
         BMP280_I2C_ADDR = addr
     }
 }
-
 namespace NEO6M {
 
     function parseRMC(sentence: string) {
