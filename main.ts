@@ -116,7 +116,7 @@ namespace BMP280 {
     }
 }
 namespace NEO_6M {
-    function parseRMC(sentence: string) {
+    export function parseRMC(sentence: string) {
         // serial.writeLine("Parts:" + sentence);
         parts = sentence.split(",")
         date = parts[9]
