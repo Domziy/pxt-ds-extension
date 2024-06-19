@@ -202,7 +202,7 @@ namespace NEO6M {
     export function get_utc_time(): string {
         collectGPSData()
         let cas: string
-        cas = time.substr(0, 2) + ":" + date.substr(2, 2) + ":" + date.substr(4, 2)
+        cas = time.substr(0, 2) + ":" + time.substr(2, 2) + ":" + time.substr(4, 2)
         return cas
     }
 
