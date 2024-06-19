@@ -1,10 +1,11 @@
-enum BMP280_I2C_ADDRESS {
-    //% block="0x76"
-    ADDR_0x76 = 0x76,
-    //% block="0x77"
-    ADDR_0x77 = 0x77
-}
 namespace BMP280 {
+    enum BMP280_I2C_ADDRESS {
+        //% block="0x76"
+        ADDR_0x76 = 0x76,
+        //% block="0x77"
+        ADDR_0x77 = 0x77
+    }
+
     let BMP280_I2C_ADDR = BMP280_I2C_ADDRESS.ADDR_0x76
 
     function setreg(reg: number, dat: number): void {
@@ -115,13 +116,10 @@ namespace BMP280 {
         BMP280_I2C_ADDR = addr
     }
 }
+
 namespace NEO6M {
-    /**
-     * Parse RMV
-     */
-    //% blockId="NEO6M_RMC_PARSE" block="parse RMC"
-    //% weight=80 blockGap=8
-    export function parseRMC(sentence: string) {
+
+    function parseRMC(sentence: string) {
         // serial.writeLine("Parts:" + sentence);
         parts = sentence.split(",")
         date = parts[9]
@@ -131,10 +129,10 @@ namespace NEO6M {
         for (let line of lines) {
             if (line.charAt(0) == "G" && line.charAt(1) == "P" && line.charAt(2) == "G" && line.charAt(3) == "G" && line.charAt(4) == "A") {
                 parseGGA(line)
-                serial.writeLine("GGA - Time: " + time + " Lat: " + lat + " Lon: " + lon + " Satellites: " + satellites + " Alttitude: " + alltitude)
+                //serial.writeLine("GGA - Time: " + time + " Lat: " + lat + " Lon: " + lon + " Satellites: " + satellites + " Alttitude: " + alltitude)
             } else if (line.charAt(0) == "G" && line.charAt(1) == "P" && line.charAt(2) == "R" && line.charAt(3) == "M" && line.charAt(4) == "C") {
                 parseRMC(line)
-                serial.writeLine("RMC - Time: " + time + " Date: " + date + " Lat: " + lat + " Lon: " + lon)
+                //serial.writeLine("RMC - Time: " + time + " Date: " + date + " Lat: " + lat + " Lon: " + lon)
             }
         }
     }
@@ -147,16 +145,32 @@ namespace NEO6M {
         alltitude = parseInt(parts[9])
     }
 
-    // Function to read data from the GPS module for a short duration
     function collectGPSData() {
         let buff: Buffer
         startTime = input.runningTime()
+        serial.redirect(
+            SerialPin.P0,
+            SerialPin.P1,
+            BaudRate.BaudRate9600
+        )
         while (input.runningTime() - startTime < 1100) {
             buff = serial.readBuffer(1)
             collectedData = "" + collectedData + buff.toString()
         }
+        parseGPSData(collectedData)
+        serial.redirectToUSB()
     }
 
+    /**
+     * Get coordinates
+     */
+    //% blockId="NEO6M_RMC_PARSE" block="Get coordinates"
+    //% weight=80 blockGap=8
+    export function get_coordinates(): string
+    {
+        collectGPSData()
+        return lat + " " + lon
+    }
     let alltitude: number
     let parts3: string[] = []
     let collectedData = ""
