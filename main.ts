@@ -115,3 +115,60 @@ namespace BMP280 {
         BMP280_I2C_ADDR = addr
     }
 }
+namespace NEO_6M {
+    function parseRMC(sentence: string) {
+        // serial.writeLine("Parts:" + sentence);
+        parts = sentence.split(",")
+        date = parts[9]
+    }
+    function parseGPSData(data: string) {
+        lines = data.split("$")
+        for (let line of lines) {
+            if (line.charAt(0) == "G" && line.charAt(1) == "P" && line.charAt(2) == "G" && line.charAt(3) == "G" && line.charAt(4) == "A") {
+                parseGGA(line)
+                serial.writeLine("GGA - Time: " + time + " Lat: " + lat + " Lon: " + lon + " Satellites: " + satellites + " Alttitude: " + alltitude)
+            } else if (line.charAt(0) == "G" && line.charAt(1) == "P" && line.charAt(2) == "R" && line.charAt(3) == "M" && line.charAt(4) == "C") {
+                parseRMC(line)
+                serial.writeLine("RMC - Time: " + time + " Date: " + date + " Lat: " + lat + " Lon: " + lon)
+            }
+        }
+    }
+    function parseGGA(sentence: string) {
+        parts = sentence.split(",")
+        time = parts[1]
+        lat = "" + parts[2].substr(0, 2) + " " + parts[2].substr(2, parts[2].length) + parts[3]
+        lon = "" + parts[4].substr(0, 3) + " " + parts[4].substr(3, parts[2].length) + parts[5]
+        satellites = parseInt(parts[7])
+        alltitude = parseInt(parts[9])
+    }
+
+    // Function to read data from the GPS module for a short duration
+    function collectGPSData() {
+        let buff: Buffer
+        startTime = input.runningTime()
+        while (input.runningTime() - startTime < 1100) {
+            buff = serial.readBuffer(1)
+            collectedData = "" + collectedData + buff.toString()
+        }
+    }
+
+    let alltitude: number
+    let parts3: string[] = []
+    let collectedData = ""
+    let startTime = 0
+    let dotPos = 0
+    let satellites = 0
+    let lines: string[] = []
+    let date = ""
+    let time = ""
+    let parts: string[] = []
+    let totalSatellites = ""
+    let gsvData = 0
+    let rmcData = 0
+    let ggaData = 0
+    let parts2: number[] = []
+    let time2 = ""
+    let gpsData = ""
+    let lon: string
+    let lat: string
+}
