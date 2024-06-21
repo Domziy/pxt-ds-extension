@@ -1,10 +1,96 @@
-namespace BMP280 {
-    enum BMP280_I2C_ADDRESS {
-        //% block="0x76"
-        ADDR_0x76 = 0x76,
-        //% block="0x77"
-        ADDR_0x77 = 0x77
+namespace MAX30100 {
+
+    // Function to write to a register
+    function writeRegister(register: number, value: number) {
+        let buffer = pins.createBuffer(2)
+        buffer[0] = register
+        buffer[1] = value
+        pins.i2cWriteBuffer(0x57, buffer)
     }
+    
+    let threshold = 14000
+    let numReadings = 0
+    let IR = 0
+    numReadings = 20
+
+    /**
+     * Set threshold
+     */
+    //% blockId="MAX30100_SET_THRESHOLD" block="Set threshold %user_threshold"
+    //% weight=80 blockGap=8
+    export function set_threshold(user_threshold: number){
+        threshold = user_threshold
+    }
+
+    /**
+     * Get finger data
+     */
+    //% blockId="MAX30100_GET_FINGER" block="Get heartbeat detection"
+    //% weight=80 blockGap=8
+    export function read_MAX30100(): number {
+        let readings: number[] = []
+        let red: number
+        let sumIR = 0
+        let avgIR = 0
+
+        // INIT code for the MAX30100
+        // Write 0x03 to register 0x06 (enable heartbeat and SpO2 readings)
+        writeRegister(6, 3)
+        // Write 0x44 to register 0x09 (set IR and Red LED currents)
+        writeRegister(9, 68)
+        // Write 0x03 to register 0x07 (enable LED PWM)
+        writeRegister(7, 3)
+        // Write 0x03 to register 0x06 (re-enable heartbeat and SpO2 readings)
+        writeRegister(6, 3)
+        // Write 0x00 to registers 0x02, 0x03, and 0x04
+        writeRegister(2, 0)
+        writeRegister(3, 0)
+        writeRegister(4, 0)
+        // Set the sampling rate to 0x13 in register 0x07
+        writeRegister(7, 19)
+
+        // Point to the FIFO data register
+        for (let i = 0; i <= numReadings - 1; i++) {
+            // Read Red LED value
+            pins.i2cWriteNumber(
+                87,
+                5,
+                NumberFormat.UInt8BE,
+                true
+            )
+            red = pins.i2cReadNumber(87, NumberFormat.UInt16BE, false)
+            // Add the new reading to the array
+            readings.push(red)
+        }
+
+        for (let i = 0; i <= readings.length - 1; i++) {
+            sumIR += readings[i]
+        }
+        avgIR = sumIR / readings.length
+        // Check if the average IR value exceeds the threshold
+        if (avgIR > threshold) {
+            //serial.writeString("Finger detected. Average IR: ")
+            return 1;
+        } 
+        else 
+        {
+            //serial.writeString("No finger detected. Average IR: ")
+            return 0;
+        }
+
+       
+    }
+    
+}
+
+enum BMP280_I2C_ADDRESS {
+    //% block="0x76"
+    ADDR_0x76 = 0x76,
+    //% block="0x77"
+    ADDR_0x77 = 0x77
+}
+
+namespace BMP280 {
 
     let BMP280_I2C_ADDR = BMP280_I2C_ADDRESS.ADDR_0x76
 
@@ -72,7 +158,7 @@ namespace BMP280 {
     /**
      * get pressure
      */
-    //% blockId="BMP280_GET_PRESSURE" block="get pressures"
+    //% blockId="BMP280_GET_PRESSURE" block="Get pressures"
     //% weight=80 blockGap=8
     export function pressure(): number {
         get();
@@ -82,7 +168,7 @@ namespace BMP280 {
     /**
      * get temperature
      */
-    //% blockId="BMP280_GET_TEMPERATURE" block="get temperature"
+    //% blockId="BMP280_GET_TEMPERATURE" block="Get temperature"
     //% weight=80 blockGap=8
     export function temperature(): number {
         get();
@@ -110,12 +196,13 @@ namespace BMP280 {
     /**
      * set I2C address
      */
-    //% blockId="BMP280_SET_ADDRESS" block="set address %addr"
+    //% blockId="BMP280_SET_ADDRESS" block="Set address %addr"
     //% weight=50 blockGap=8
     export function Address(addr: BMP280_I2C_ADDRESS) {
         BMP280_I2C_ADDR = addr
     }
 }
+
 namespace NEO6M {
 
     function parseRMC(sentence: string) {
@@ -152,7 +239,7 @@ namespace NEO6M {
             SerialPin.P1,
             BaudRate.BaudRate9600
         )
-        while (input.runningTime() - startTime < 1100) {
+        while (input.runningTime() - startTime < 1300) {
             buff = serial.readBuffer(1)
             collectedData = "" + collectedData + buff.toString()
         }
